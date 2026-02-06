@@ -1,0 +1,7 @@
+{
+  "name": "NextGenEval - Institutional AI Grading SaaS",
+  "description": "A generalized, high-precision AI evaluation platform for schools and institutions. Automate student script auditing with professional accuracy and institutional management.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
