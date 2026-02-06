@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { supabase } from '../supabase';
 
+const ADMIN_EMAIL = 'aarshiv.ai@gmail.com';
+
 const Auth: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -36,94 +38,101 @@ const Auth: React.FC = () => {
         if (signUpError) throw signUpError;
 
         if (data.user) {
+          // creator@admin gets special role
+          const role = email === ADMIN_EMAIL ? 'admin' : 'institution';
+          const initialCredits = email === ADMIN_EMAIL ? 999999 : 5;
+
           const { error: profileError } = await supabase.from('profiles').upsert({
             id: data.user.id,
-            name: name,
+            name: name || (email === ADMIN_EMAIL ? 'Creator Admin' : ''),
             email: email,
-            credits: 5,
+            credits: initialCredits,
             freeTrialUsed: false,
             joinedDate: Date.now(),
-            role: 'institution'
+            role: role
           }, { onConflict: 'id' });
 
           if (profileError) throw profileError;
 
           if (data.session) {
-            setSuccess("Institutional node activated.");
+            setSuccess("Access Granted. Node Linked.");
           } else {
-            setSuccess("Node registered. Authorization required.");
+            setSuccess("Node registered. Verification required.");
             setIsLogin(true);
           }
         }
       }
     } catch (err: any) {
-      setError(err.message || 'Access Denied.');
+      setError(err.message || 'GATE_DENIED: Credential Mismatch.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#050505] p-6">
-      <div className="w-full max-w-md bg-[#0a0a0a] rounded-3xl border border-[#1a1a1a] p-10 lg:p-14 card-3d">
-        <div className="text-center mb-12">
-          <div className="w-16 h-16 bg-[#00ff9d] rounded flex items-center justify-center text-black font-black text-3xl mx-auto mb-6 shadow-[0_0_30px_rgba(0,255,157,0.3)]">N</div>
+    <div className="min-h-screen flex items-center justify-center bg-black p-6">
+      <div className="scanline"></div>
+      <div className="w-full max-w-md bg-[#050505] rounded-sm border border-[#1a1a1a] p-12 lg:p-16 pro-card relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-24 h-24 bg-[#00ff9d]/5 blur-3xl rounded-full translate-x-12 -translate-y-12"></div>
+        
+        <div className="text-center mb-16 relative z-10">
+          <div className="w-16 h-16 bg-[#00ff9d] rounded-sm flex items-center justify-center text-black font-black text-3xl mx-auto mb-8 shadow-[0_0_40px_rgba(0,255,157,0.3)]">N</div>
           <h1 className="text-4xl font-black text-white tracking-tighter mb-2">
-            {isLogin ? 'AUTH_GATE' : 'NODE_INIT'}
+            {isLogin ? 'SECURITY_GATE' : 'NODE_INIT'}
           </h1>
-          <p className="text-[#00ff9d] font-bold uppercase tracking-[0.3em] text-[10px]">
-            Institutional Access Protocol
+          <p className="text-[#00ff9d] font-black uppercase tracking-[0.4em] text-[9px] opacity-70">
+            PRO INSTITUTIONAL ACCESS
           </p>
         </div>
 
         {error && (
-          <div className="mb-8 p-4 bg-red-900/20 border border-red-900/40 rounded-lg text-red-500 text-[10px] font-black uppercase tracking-widest text-center animate-shake">
+          <div className="mb-10 p-4 bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-black uppercase tracking-widest text-center animate-shake">
             {error}
           </div>
         )}
 
         {success && (
-          <div className="mb-8 p-4 bg-emerald-900/20 border border-emerald-900/40 rounded-lg text-[#00ff9d] text-[10px] font-black uppercase tracking-widest text-center">
+          <div className="mb-10 p-4 bg-emerald-500/10 border border-emerald-500/20 text-[#00ff9d] text-[10px] font-black uppercase tracking-widest text-center">
             {success}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-8 relative z-10">
           {!isLogin && (
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-1">Institution Entity</label>
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">ENTITY_IDENTIFIER</label>
               <input 
                 type="text" 
                 required 
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 disabled={loading}
-                className="w-full px-5 py-4 input-dark rounded-xl font-medium disabled:opacity-50"
-                placeholder="e.g. ST. JUDE UNIVERSITY"
+                className="w-full px-5 py-5 input-pro rounded-sm text-xs font-bold disabled:opacity-50"
+                placeholder="ST. MARY'S ACADEMY"
               />
             </div>
           )}
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-1">Admin Identifier</label>
+          <div className="space-y-3">
+            <label className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">ADMIN_LOGIN</label>
             <input 
               type="email" 
               required 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={loading}
-              className="w-full px-5 py-4 input-dark rounded-xl font-medium disabled:opacity-50"
+              className="w-full px-5 py-5 input-pro rounded-sm text-xs font-bold disabled:opacity-50"
               placeholder="admin@institution.edu"
             />
           </div>
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-1">Security Cipher</label>
+          <div className="space-y-3">
+            <label className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">SECURITY_CIPHER</label>
             <input 
               type="password" 
               required 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={loading}
-              className="w-full px-5 py-4 input-dark rounded-xl font-medium disabled:opacity-50"
+              className="w-full px-5 py-5 input-pro rounded-sm text-xs font-bold disabled:opacity-50"
               placeholder="••••••••"
             />
           </div>
@@ -131,20 +140,20 @@ const Auth: React.FC = () => {
           <button 
             type="submit"
             disabled={loading}
-            className="w-full py-5 btn-neon rounded-xl mt-6 disabled:opacity-50 flex items-center justify-center gap-3"
+            className="w-full py-6 btn-pro rounded-sm mt-8 disabled:opacity-50 flex items-center justify-center gap-3"
           >
             {loading && <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />}
-            {isLogin ? 'GRANT ACCESS' : 'INITIALIZE NODE'}
+            {isLogin ? 'GRANT_ACCESS' : 'INITIALIZE_NODE'}
           </button>
         </form>
 
-        <div className="mt-10 text-center">
+        <div className="mt-12 text-center relative z-10">
           <button 
             onClick={() => { setIsLogin(!isLogin); setError(null); setSuccess(null); }}
             disabled={loading}
-            className="text-zinc-500 font-black text-[10px] uppercase tracking-widest hover:text-[#00ff9d] transition-colors"
+            className="text-zinc-700 font-black text-[9px] uppercase tracking-[0.2em] hover:text-[#00ff9d] transition-colors"
           >
-            {isLogin ? "PROCEED TO REGISTRATION" : "BACK TO LOGIN GATE"}
+            {isLogin ? "PROCEED_TO_REGISTRATION" : "RETURN_TO_SECURITY_GATE"}
           </button>
         </div>
       </div>

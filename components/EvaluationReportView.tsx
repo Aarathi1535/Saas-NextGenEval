@@ -130,4 +130,41 @@ const EvaluationReportView: React.FC<EvaluationReportViewProps> = ({ report, onR
         </div>
       </div>
 
-      <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-2xl overflow-hidden mb-20 card-3
+      <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-2xl overflow-hidden mb-20 card-3d">
+        <div className="p-8 border-b border-[#1a1a1a] bg-black">
+           <h2 className="text-[11px] font-black uppercase tracking-[0.3em] text-zinc-500">Analytical Breakdown</h2>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="bg-[#0f0f0f] text-zinc-600 text-[10px] font-black uppercase tracking-widest border-b border-[#1a1a1a]">
+                <th className="px-10 py-6">ID</th>
+                <th className="px-10 py-6 w-1/4">RESPONSE</th>
+                <th className="px-10 py-6 w-1/4">SCHEMA</th>
+                <th className="px-10 py-6 text-center">SCORE</th>
+                <th className="px-10 py-6 w-1/4">OBSERVATIONS</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#1a1a1a] text-[13px]">
+              {report.grades.map((grade, idx) => (
+                <tr key={idx} className="hover:bg-[#141414] transition-all">
+                  <td className="px-10 py-10 font-black text-zinc-400 align-top">Q{grade.questionNumber}</td>
+                  <td className="px-10 py-10 text-white font-medium leading-relaxed align-top">{grade.studentAnswer}</td>
+                  <td className="px-10 py-10 text-zinc-600 italic leading-relaxed align-top">{grade.correctAnswer}</td>
+                  <td className="px-10 py-10 align-top text-center">
+                    <span className="font-black text-[#00ff9d] bg-black px-3 py-1 rounded border border-[#222] text-[11px]">
+                      {grade.marksObtained} / {grade.totalMarks}
+                    </span>
+                  </td>
+                  <td className="px-10 py-10 text-zinc-500 italic leading-relaxed align-top">{grade.feedback}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default EvaluationReportView;
