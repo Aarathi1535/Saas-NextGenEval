@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { HistoryItem, BillingInfo, UserProfile } from '../types';
+import { HistoryItem, UserProfile } from '../types';
 import { supabase } from '../supabase';
 
 interface DashboardProps {
@@ -38,124 +38,114 @@ const Dashboard: React.FC<DashboardProps> = ({ history, profile, onViewReport, o
   };
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-3 duration-700">
-      {/* Credit Status & Pricing */}
-      <div className="mb-10 flex flex-col lg:flex-row gap-6">
-        <div className="flex-1 bg-gradient-to-br from-indigo-600 to-violet-700 p-8 rounded-[32px] text-white shadow-xl shadow-indigo-100 flex items-center justify-between overflow-hidden relative group">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-32 translate-x-32"></div>
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80 mb-2">Institutional Credits Available</p>
-            <h2 className="text-5xl font-black tracking-tighter mb-4">{profile.credits}</h2>
+    <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+        <div className="lg:col-span-8 bg-[#0a0a0a] border border-[#1a1a1a] p-10 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-10 card-3d">
+          <div className="flex-1">
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 mb-2">Available Credits</p>
+            <h2 className="text-6xl font-black neon-text mb-6">{profile.credits}</h2>
             <div className="flex gap-4">
-              <button className="px-5 py-2.5 bg-white text-indigo-700 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all">Purchase Plan</button>
-              <button className="px-5 py-2.5 bg-indigo-500/30 border border-white/20 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-500/40 transition-all">Redeem Coupon</button>
+              <button className="px-6 py-2.5 btn-neon rounded-lg text-[10px]">Purchase Credits</button>
+              <button className="px-6 py-2.5 border border-[#222] text-zinc-400 rounded-lg text-[10px] font-black uppercase hover:border-[#00ff9d] hover:text-[#00ff9d] transition-all">Redeem Voucher</button>
             </div>
           </div>
-          <div className="hidden sm:block text-right">
-             <p className="text-[10px] font-black uppercase tracking-widest opacity-80">Charge per sheet</p>
-             <p className="text-2xl font-black">$0.50</p>
+          <div className="text-right hidden md:block">
+            <p className="text-[10px] font-black uppercase text-zinc-500 mb-1">Standard Rate</p>
+            <p className="text-3xl font-black text-white">$0.50 <span className="text-[10px] text-zinc-500">/ SHEET</span></p>
           </div>
         </div>
 
-        <div className="lg:w-80 bg-white p-8 rounded-[32px] border border-slate-100 shadow-xl flex flex-col justify-between">
+        <div className="lg:col-span-4 bg-[#0a0a0a] border border-[#1a1a1a] p-10 rounded-2xl flex flex-col justify-between card-3d">
            <div>
-             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Global Usage</p>
-             <h3 className="text-2xl font-black text-slate-800 tracking-tighter">{profile.totalEvaluations} Sheets</h3>
+             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 mb-2">Total Output</p>
+             <h3 className="text-3xl font-black text-white">{profile.totalEvaluations} AUDITS</h3>
            </div>
-           <div className="mt-6">
-              <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase mb-2">
-                <span>Free Trial Used</span>
-                <span className={profile.freeTrialUsed ? 'text-red-500' : 'text-emerald-500'}>{profile.freeTrialUsed ? 'YES' : 'NO'}</span>
+           <div className="mt-8">
+              <div className="flex justify-between text-[10px] font-black uppercase mb-3">
+                <span className="text-zinc-500">Node Status</span>
+                <span className="text-[#00ff9d] pulse-neon">ACTIVE</span>
               </div>
-              <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                 <div className="h-full bg-indigo-500" style={{ width: profile.freeTrialUsed ? '100%' : '0%' }}></div>
+              <div className="w-full h-1 bg-[#1a1a1a] rounded-full overflow-hidden">
+                 <div className="h-full bg-[#00ff9d] shadow-[0_0_10px_rgba(0,255,157,0.5)]" style={{ width: '100%' }}></div>
               </div>
            </div>
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
-        <div className="flex gap-4 p-1 bg-slate-100 rounded-2xl border border-slate-200">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
+        <div className="flex gap-2 p-1 bg-[#0a0a0a] border border-[#1a1a1a] rounded-xl">
            <button 
              onClick={() => setActiveTab('history')}
-             className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'history' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'}`}
+             className={`px-6 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'history' ? 'bg-[#141414] text-[#00ff9d] neon-text shadow-xl' : 'text-zinc-500 hover:text-white'}`}
            >
-             Institutional Vault
+             Batch History
            </button>
            {profile.role === 'admin' && (
              <button 
                onClick={() => setActiveTab('admin')}
-               className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'admin' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'}`}
+               className={`px-6 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'admin' ? 'bg-[#141414] text-[#00ff9d] neon-text shadow-xl' : 'text-zinc-500 hover:text-white'}`}
              >
-               System Admin
+               Admin Console
              </button>
            )}
         </div>
         <button 
           onClick={onNewEvaluation}
           disabled={profile.credits <= 0}
-          className={`w-full sm:w-auto px-8 py-4 rounded-2xl font-black shadow-xl transition-all active:scale-95 flex items-center justify-center gap-3 uppercase text-[11px] tracking-widest ${profile.credits > 0 ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
+          className={`px-8 py-4 rounded-xl btn-neon shadow-2xl flex items-center gap-3 text-[11px] ${profile.credits <= 0 ? 'opacity-30 grayscale cursor-not-allowed' : ''}`}
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M12 4v16m8-8H4" /></svg>
-          New Evaluation Batch
+          INIT NEW BATCH
         </button>
       </div>
 
-      {activeTab === 'history' ? (
-        <div className="bg-white rounded-[32px] border border-slate-100 shadow-xl overflow-hidden">
-          <div className="px-10 py-6 border-b border-slate-50 bg-slate-50/50 flex justify-between items-center">
-            <h2 className="text-[11px] font-black text-slate-800 uppercase tracking-widest">Evaluation Records</h2>
-            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">SOC2 TYPE II COMPLIANT</span>
-          </div>
-          
-          {history.length === 0 ? (
-            <div className="p-24 text-center">
-              <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-6 text-slate-300">
+      <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-2xl overflow-hidden card-3d">
+        {activeTab === 'history' ? (
+          history.length === 0 ? (
+            <div className="py-32 text-center">
+              <div className="w-16 h-16 border border-[#222] rounded-2xl flex items-center justify-center mx-auto mb-6 text-zinc-700">
                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
               </div>
-              <p className="text-slate-400 font-black uppercase text-[10px] tracking-widest">No institutional records found</p>
+              <p className="text-zinc-600 font-black uppercase text-[10px] tracking-[0.5em]">No data records found in vault</p>
             </div>
           ) : (
-            <div className="overflow-x-auto scrollbar-thin">
-              <table className="w-full text-left min-w-[640px]">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
                 <thead>
-                  <tr className="bg-slate-50 text-slate-400 text-[10px] font-black uppercase tracking-widest">
-                    <th className="px-10 py-5">Student / Batch</th>
-                    <th className="px-10 py-5">Course</th>
-                    <th className="px-10 py-5 text-center">Perf. Score</th>
-                    <th className="px-10 py-5 text-center">Sheets</th>
-                    <th className="px-10 py-5 text-right">Action</th>
+                  <tr className="bg-[#0f0f0f] text-zinc-500 text-[10px] font-black uppercase tracking-widest border-b border-[#1a1a1a]">
+                    <th className="px-10 py-6">IDENTIFIER / TIMESTAMP</th>
+                    <th className="px-10 py-6">SUBJECT</th>
+                    <th className="px-10 py-6 text-center">ACCURACY</th>
+                    <th className="px-10 py-6 text-center">PAGES</th>
+                    <th className="px-10 py-6 text-right">OPERATIONS</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-[#1a1a1a]">
                   {history.map((item) => (
-                    <tr key={item.id} className="hover:bg-indigo-50/30 transition-colors group">
-                      <td className="px-10 py-7">
-                        <p className="font-black text-slate-900 text-[13px] tracking-tight mb-1 uppercase truncate max-w-[150px]">{item.report.studentInfo.name}</p>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{new Date(item.timestamp).toLocaleDateString()}</p>
+                    <tr key={item.id} className="hover:bg-[#141414] transition-colors group">
+                      <td className="px-10 py-8">
+                        <p className="font-black text-white text-[13px] uppercase tracking-tight mb-1 truncate max-w-[150px]">{item.report.studentInfo.name}</p>
+                        <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-wider">{new Date(item.timestamp).toLocaleString()}</p>
                       </td>
-                      <td className="px-10 py-7">
-                        <span className="px-3 py-1 bg-indigo-50 rounded-lg text-[10px] font-black text-indigo-600 uppercase tracking-widest">
+                      <td className="px-10 py-8">
+                        <span className="px-3 py-1 bg-black border border-[#222] rounded text-[10px] font-black text-zinc-300 uppercase tracking-widest">
                           {item.report.studentInfo.subject}
                         </span>
                       </td>
-                      <td className="px-10 py-7 text-center">
-                        <div className="flex flex-col items-center">
-                          <span className={`font-black text-[14px] tracking-tighter ${item.report.percentage >= 40 ? 'text-indigo-600' : 'text-red-500'}`}>
-                            {item.report.percentage.toFixed(1)}%
-                          </span>
-                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">ACCURACY</p>
-                        </div>
+                      <td className="px-10 py-8 text-center">
+                        <span className={`font-black text-[14px] ${item.report.percentage >= 40 ? 'neon-text' : 'text-red-500'}`}>
+                          {item.report.percentage.toFixed(1)}%
+                        </span>
                       </td>
-                      <td className="px-10 py-7 text-center">
-                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest whitespace-nowrap">{item.pages_processed} PAGES</span>
+                      <td className="px-10 py-8 text-center font-black text-zinc-400 text-[11px]">
+                        {item.pages_processed}
                       </td>
-                      <td className="px-10 py-7 text-right">
+                      <td className="px-10 py-8 text-right">
                         <div className="flex justify-end gap-2">
-                          <button onClick={() => onViewReport(item)} className="p-3 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all">
+                          <button onClick={() => onViewReport(item)} className="p-3 text-zinc-600 hover:text-[#00ff9d] transition-all">
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                           </button>
-                          <button onClick={() => onDeleteReport(item.id)} className="p-3 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all">
+                          <button onClick={() => onDeleteReport(item.id)} className="p-3 text-zinc-800 hover:text-red-500 transition-all">
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                           </button>
                         </div>
@@ -165,63 +155,37 @@ const Dashboard: React.FC<DashboardProps> = ({ history, profile, onViewReport, o
                 </tbody>
               </table>
             </div>
-          )}
-        </div>
-      ) : (
-        /* Admin View */
-        <div className="space-y-6">
-           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-xl">
-                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Total System Users</p>
-                 <p className="text-4xl font-black text-slate-900">{allUsers.length}</p>
-              </div>
-              <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-xl">
-                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Total System Evaluations</p>
-                 <p className="text-4xl font-black text-slate-900">{allEvaluations.length}</p>
-              </div>
-              <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-xl">
-                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Active Trial Instances</p>
-                 <p className="text-4xl font-black text-indigo-600">{allUsers.filter(u => !u.freeTrialUsed).length}</p>
-              </div>
-           </div>
-
-           <div className="bg-white rounded-[32px] border border-slate-100 shadow-xl overflow-hidden">
-             <div className="px-10 py-6 border-b border-slate-50 bg-indigo-50/30 flex justify-between items-center">
-                <h2 className="text-[11px] font-black text-slate-800 uppercase tracking-widest">Global Institutional Performance</h2>
-                {loadingAdmin && <div className="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>}
-             </div>
-             <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="bg-slate-50 text-slate-400 text-[10px] font-black uppercase tracking-widest">
-                       <th className="px-10 py-5">Institution</th>
-                       <th className="px-10 py-5">Role</th>
-                       <th className="px-10 py-5">Credits</th>
-                       <th className="px-10 py-5 text-center">Total Sheets</th>
-                       <th className="px-10 py-5 text-right">Joined</th>
+          )
+        ) : (
+          <div className="overflow-x-auto">
+             <table className="w-full text-left">
+                <thead>
+                  <tr className="bg-[#0f0f0f] text-zinc-500 text-[10px] font-black uppercase tracking-widest border-b border-[#1a1a1a]">
+                     <th className="px-10 py-6">ENTITY</th>
+                     <th className="px-10 py-6">ROLE</th>
+                     <th className="px-10 py-6">CREDITS</th>
+                     <th className="px-10 py-6 text-center">TOTAL AUDITS</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#1a1a1a] text-[12px]">
+                  {allUsers.map(user => (
+                    <tr key={user.id} className="hover:bg-[#141414] transition-colors">
+                      <td className="px-10 py-6">
+                        <p className="font-black text-white uppercase">{user.name}</p>
+                        <p className="text-[10px] text-zinc-600">{user.email}</p>
+                      </td>
+                      <td className="px-10 py-6">
+                        <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase ${user.role === 'admin' ? 'bg-[#00ff9d] text-black' : 'bg-[#1a1a1a] text-zinc-500'}`}>{user.role}</span>
+                      </td>
+                      <td className="px-10 py-6 font-black text-[#00ff9d]">{user.credits}</td>
+                      <td className="px-10 py-6 text-center font-black text-white">{user.totalEvaluations}</td>
                     </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 text-[12px]">
-                    {allUsers.map(user => (
-                      <tr key={user.id} className="hover:bg-slate-50">
-                        <td className="px-10 py-5">
-                          <p className="font-bold text-slate-900 uppercase">{user.name}</p>
-                          <p className="text-[10px] text-slate-400">{user.email}</p>
-                        </td>
-                        <td className="px-10 py-5">
-                          <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase ${user.role === 'admin' ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-500'}`}>{user.role}</span>
-                        </td>
-                        <td className="px-10 py-5 font-bold text-slate-600">{user.credits}</td>
-                        <td className="px-10 py-5 text-center font-black text-indigo-600">{user.totalEvaluations}</td>
-                        <td className="px-10 py-5 text-right text-slate-400 font-medium">{new Date(user.joinedDate).toLocaleDateString()}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-             </div>
-           </div>
-        </div>
-      )}
+                  ))}
+                </tbody>
+             </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
