@@ -26,11 +26,13 @@ const Auth: React.FC = () => {
         if (signInError) throw signInError;
       } else {
         // Sign up
+        console.debug("Attempting signup for:", name);
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: {
             data: { 
+              name: name,
               full_name: name 
             },
           },
@@ -39,8 +41,8 @@ const Auth: React.FC = () => {
         if (signUpError) throw signUpError;
 
         if (data.user) {
+          console.debug("User created successfully, id:", data.user.id);
           // Initialize profile in public.profiles
-          // We use upsert to handle cases where the user might have been created but insertion failed previously
           const { error: profileError } = await supabase.from('profiles').upsert({
             id: data.user.id,
             name: name, // Uses the state variable from the input
@@ -52,23 +54,20 @@ const Auth: React.FC = () => {
           }, { onConflict: 'id' });
 
           if (profileError) {
-            console.error("Profile creation error:", profileError);
-            // If the error is that it already exists, we can ignore it and let the user log in
-            if (!profileError.message.includes("already exists")) {
-               throw new Error("Institutional profile initialization failed. Please try signing in.");
-            }
+            console.error("Profile creation error details:", profileError);
+            throw new Error(`Profile initialization failed: ${profileError.message}`);
           }
 
           if (data.session) {
-            setSuccess("Institutional account activated.");
+            setSuccess("Institutional account activated successfully.");
           } else {
-            setSuccess("Registration successful! You can now sign in.");
+            setSuccess("Registration successful! Please check your email or sign in.");
             setIsLogin(true);
           }
         }
       }
     } catch (err: any) {
-      console.error("Auth error:", err);
+      console.error("Auth submit process error:", err);
       setError(err.message || 'Authentication failure.');
     } finally {
       setLoading(false);
