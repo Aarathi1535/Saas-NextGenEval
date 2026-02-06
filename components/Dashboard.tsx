@@ -18,6 +18,7 @@ const Dashboard: React.FC<DashboardProps> = ({ history, profile, onViewReport, o
   const [allUsers, setAllUsers] = useState<UserProfile[]>([]);
   const [allEvaluations, setAllEvaluations] = useState<any[]>([]);
   const [loadingAdmin, setLoadingAdmin] = useState(false);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const isSystemAdmin = profile.email === ADMIN_EMAIL;
 
@@ -30,7 +31,7 @@ const Dashboard: React.FC<DashboardProps> = ({ history, profile, onViewReport, o
   const fetchAdminData = async () => {
     setLoadingAdmin(true);
     try {
-      const { data: users } = await supabase.from('profiles').select('*');
+      const { data: users } = await supabase.from('profiles').select('*').order('joinedDate', { ascending: false });
       const { data: evals } = await supabase.from('evaluations').select('*, profiles(name)');
       if (users) setAllUsers(users);
       if (evals) setAllEvaluations(evals);
@@ -38,6 +39,29 @@ const Dashboard: React.FC<DashboardProps> = ({ history, profile, onViewReport, o
       console.error("Admin fetch error", err);
     } finally {
       setLoadingAdmin(false);
+    }
+  };
+
+  const handleAdjustCredits = async (userId: string, amount: number) => {
+    setActionLoading(userId);
+    try {
+      const targetUser = allUsers.find(u => u.id === userId);
+      if (!targetUser) return;
+      
+      const newCredits = Math.max(0, targetUser.credits + amount);
+      const { error } = await supabase
+        .from('profiles')
+        .update({ credits: newCredits })
+        .eq('id', userId);
+
+      if (error) throw error;
+      
+      // Update local state
+      setAllUsers(prev => prev.map(u => u.id === userId ? { ...u, credits: newCredits } : u));
+    } catch (err) {
+      console.error("Failed to adjust credits", err);
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -166,12 +190,13 @@ const Dashboard: React.FC<DashboardProps> = ({ history, profile, onViewReport, o
                      <th className="px-10 py-6">ENTITY_NAME</th>
                      <th className="px-10 py-6">RANK</th>
                      <th className="px-10 py-6">CREDIT_CAP</th>
-                     <th className="px-10 py-6 text-center">AGGREGATE_AUDITS</th>
+                     <th className="px-10 py-6 text-center">TOTAL_AUDITS</th>
+                     <th className="px-10 py-6 text-right">ADMIN_ACTIONS</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#1a1a1a] text-[12px]">
                   {allUsers.map(user => (
-                    <tr key={user.id} className="hover:bg-[#0d0d0d] transition-colors">
+                    <tr key={user.id} className={`hover:bg-[#0d0d0d] transition-colors ${user.email === ADMIN_EMAIL ? 'bg-[#00ff9d]/5' : ''}`}>
                       <td className="px-10 py-7">
                         <p className="font-bold text-white uppercase tracking-tight">{user.name || '---'}</p>
                         <p className="text-[9px] text-zinc-700 font-black">{user.email}</p>
@@ -179,8 +204,30 @@ const Dashboard: React.FC<DashboardProps> = ({ history, profile, onViewReport, o
                       <td className="px-10 py-7">
                         <span className={`px-2 py-0.5 rounded-sm text-[9px] font-black uppercase ${user.role === 'admin' ? 'bg-[#00ff9d] text-black' : 'bg-[#1a1a1a] text-zinc-600'}`}>{user.role}</span>
                       </td>
-                      <td className="px-10 py-7 font-black text-[#00ff9d] tracking-tighter text-sm">{user.email === ADMIN_EMAIL ? 'INF' : user.credits}</td>
+                      <td className="px-10 py-7 font-black text-[#00ff9d] tracking-tighter text-sm">
+                        {user.email === ADMIN_EMAIL ? '∞' : user.credits}
+                      </td>
                       <td className="px-10 py-7 text-center font-bold text-white text-sm">{user.totalEvaluations}</td>
+                      <td className="px-10 py-7 text-right">
+                        {user.email !== ADMIN_EMAIL && (
+                          <div className="flex justify-end gap-2">
+                             <button 
+                               onClick={() => handleAdjustCredits(user.id, 50)}
+                               disabled={actionLoading === user.id}
+                               className="px-3 py-1 border border-[#1a1a1a] hover:border-[#00ff9d] hover:text-[#00ff9d] rounded text-[9px] font-black uppercase transition-all disabled:opacity-50"
+                             >
+                               +50
+                             </button>
+                             <button 
+                               onClick={() => handleAdjustCredits(user.id, -50)}
+                               disabled={actionLoading === user.id}
+                               className="px-3 py-1 border border-[#1a1a1a] hover:border-red-500 hover:text-red-500 rounded text-[9px] font-black uppercase transition-all disabled:opacity-50"
+                             >
+                               -50
+                             </button>
+                          </div>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
