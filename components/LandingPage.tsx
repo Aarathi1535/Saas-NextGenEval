@@ -170,7 +170,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, theme, onToggle
       </section>
 
       {/* Features Section */}
-      <section className="py-32">
+      <section id="features" className="py-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-24">
             <h2 className="text-4xl font-black tracking-tight mb-6">Built for Modern Institutions</h2>
@@ -307,8 +307,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, theme, onToggle
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-20 border-t border-border/50">
+      {/* Footer / About Section */}
+      <footer id="about" className="py-20 border-t border-border/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
             <div className="col-span-1 md:col-span-1">
@@ -323,8 +323,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, theme, onToggle
             <div>
               <h4 className="font-bold mb-6">Product</h4>
               <ul className="space-y-4 text-sm text-muted-foreground font-medium">
-                <li className="hover:text-brand-500 cursor-pointer transition-colors">Features</li>
-                <li className="hover:text-brand-500 cursor-pointer transition-colors">Pricing</li>
+                <li><a href="#features" className="hover:text-brand-500 cursor-pointer transition-colors">Features</a></li>
+                <li><a href="#pricing" className="hover:text-brand-500 cursor-pointer transition-colors">Pricing</a></li>
                 <li className="hover:text-brand-500 cursor-pointer transition-colors">Security</li>
                 <li className="hover:text-brand-500 cursor-pointer transition-colors">API</li>
               </ul>
@@ -332,7 +332,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, theme, onToggle
             <div>
               <h4 className="font-bold mb-6">Company</h4>
               <ul className="space-y-4 text-sm text-muted-foreground font-medium">
-                <li className="hover:text-brand-500 cursor-pointer transition-colors">About Us</li>
+                <li><a href="#about" className="hover:text-brand-500 cursor-pointer transition-colors">About Us</a></li>
                 <li className="hover:text-brand-500 cursor-pointer transition-colors">Careers</li>
                 <li className="hover:text-brand-500 cursor-pointer transition-colors">Blog</li>
                 <li className="hover:text-brand-500 cursor-pointer transition-colors">Contact</li>
