@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import FileUpload from './components/FileUpload';
 import EvaluationReportView from './components/EvaluationReportView';
@@ -7,6 +6,24 @@ import Auth from './components/Auth';
 import { UploadedFile, EvaluationReport, HistoryItem, UserProfile } from './types';
 import { evaluateAnswerSheet } from './services/geminiService';
 import { supabase } from './supabase';
+import { 
+  Moon, 
+  Sun, 
+  LogOut, 
+  LayoutDashboard, 
+  FileText, 
+  PlusCircle, 
+  Settings, 
+  CreditCard,
+  ChevronRight,
+  ShieldCheck,
+  Zap,
+  Loader2,
+  AlertCircle,
+  Sparkles,
+  ArrowRight,
+  History
+} from 'lucide-react';
 
 const MAX_FILE_SIZE_MB = 3;
 const ADMIN_EMAIL = 'aarshiv.ai@gmail.com';
@@ -25,11 +42,26 @@ const App: React.FC = () => {
   const [currentReport, setCurrentReport] = useState<EvaluationReport | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('theme') as 'light' | 'dark' || 'light';
+    }
+    return 'light';
+  });
+
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
-        // Special check for Creator/Admin
         const isAdmin = session.user.email === ADMIN_EMAIL;
         
         const { data: profile } = await supabase
@@ -39,7 +71,6 @@ const App: React.FC = () => {
           .single();
         
         if (profile) {
-          // Sync admin role if email matches even if DB is different
           const finalProfile = isAdmin ? { ...profile, role: 'admin' as const } : profile;
           setCurrentProfile(finalProfile);
           fetchHistory(profile.id);
@@ -85,12 +116,12 @@ const App: React.FC = () => {
   const processEvaluation = async () => {
     if (!currentProfile) return;
     if (qpFiles.length === 0 || studentFiles.length === 0) {
-      setError("CRITICAL: Mandatory documents (Question Paper + Student Scripts) missing.");
+      setError("Please upload both the Question Paper and Student Answer Sheets.");
       return;
     }
 
     if (currentProfile.credits <= 0 && currentProfile.email !== ADMIN_EMAIL) {
-      setError("EXHAUSTED: Zero credits remaining. Contact administrator.");
+      setError("Insufficient credits. Please top up your account.");
       return;
     }
 
@@ -121,7 +152,6 @@ const App: React.FC = () => {
 
       if (saveError) throw saveError;
 
-      // Deduct credit only if not admin
       if (currentProfile.email !== ADMIN_EMAIL) {
           const newCredits = currentProfile.credits - 1;
           await supabase.from('profiles').update({
@@ -137,7 +167,7 @@ const App: React.FC = () => {
       fetchHistory(currentProfile.id);
       setViewMode('report');
     } catch (err: any) {
-      setError(err.message || "ENGINE_ERROR: Institutional processing failure.");
+      setError(err.message || "Evaluation failed. Please check your files and try again.");
     } finally {
       setIsLoading(false);
     }
@@ -150,11 +180,18 @@ const App: React.FC = () => {
     }
   };
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+  };
+
   if (isAuthLoading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-black">
-        <div className="w-12 h-12 border-2 border-t-[#00ff9d] border-transparent rounded-full animate-spin mb-4"></div>
-        <p className="text-[10px] font-black uppercase tracking-[0.6em] text-[#00ff9d] animate-pulse">Initializing Security Protocol</p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background">
+        <div className="relative">
+          <div className="w-16 h-16 border-4 border-brand-500/20 rounded-full"></div>
+          <div className="w-16 h-16 border-4 border-brand-500 border-t-transparent rounded-full animate-spin absolute inset-0"></div>
+        </div>
+        <p className="mt-6 text-sm font-semibold tracking-widest uppercase text-muted-foreground animate-pulse">Initializing System</p>
       </div>
     );
   }
@@ -164,117 +201,173 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white selection:bg-[#00ff9d] selection:text-black">
-      <div className="scanline"></div>
-      
-      {/* High-fidelity Pro Navbar */}
-      <nav className="glass-nav sticky top-0 z-50 no-print">
-        <div className="max-w-[1440px] mx-auto px-8 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-5 cursor-pointer group" onClick={() => setViewMode('uploader')}>
-            <div className="w-10 h-10 bg-[#00ff9d] rounded-sm flex items-center justify-center text-black font-black text-xl shadow-[0_0_20px_rgba(0,255,157,0.4)] transition-all">N</div>
-            <div>
-              <h1 className="text-xl font-bold tracking-tight">NEXTGEN<span className="text-[#00ff9d]">EVAL</span></h1>
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#00ff9d] animate-pulse"></div>
-                <p className="text-[8px] text-[#00ff9d] font-black uppercase tracking-[0.4em]">PRO_SYSTEM</p>
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-500 mesh-gradient">
+      {/* Unique Floating Header */}
+      <header className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-7xl no-print">
+        <div className="glass rounded-3xl border border-border/50 shadow-2xl px-6 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-10">
+            <div 
+              className="flex items-center gap-3 cursor-pointer group" 
+              onClick={() => setViewMode('uploader')}
+            >
+              <div className="w-10 h-10 bg-brand-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-brand-500/30 group-hover:rotate-12 transition-transform duration-500">
+                <Sparkles size={20} />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-lg font-bold tracking-tight leading-none">NextGenEval</span>
+                <span className="text-[10px] font-bold text-brand-600 uppercase tracking-widest">AI Core v2.5</span>
               </div>
             </div>
-          </div>
-          
-          <div className="flex items-center gap-10">
-            <div className="hidden lg:flex gap-1">
+
+            <nav className="hidden md:flex items-center bg-muted/50 p-1 rounded-2xl border border-border/50">
               <button 
                 onClick={() => setViewMode('uploader')}
-                className={`px-5 py-2 text-[10px] font-black uppercase tracking-widest rounded transition-all ${viewMode === 'uploader' || viewMode === 'report' ? 'text-[#00ff9d] border-b-2 border-[#00ff9d]' : 'text-zinc-500 hover:text-white'}`}
+                className={`flex items-center gap-2 px-6 py-2.5 text-xs font-bold rounded-xl transition-all duration-300 ${viewMode === 'uploader' || viewMode === 'report' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               >
-                EVALUATION
+                <Zap size={14} />
+                Evaluate
               </button>
               <button 
                 onClick={() => setViewMode('dashboard')}
-                className={`px-5 py-2 text-[10px] font-black uppercase tracking-widest rounded transition-all ${viewMode === 'dashboard' ? 'text-[#00ff9d] border-b-2 border-[#00ff9d]' : 'text-zinc-500 hover:text-white'}`}
+                className={`flex items-center gap-2 px-6 py-2.5 text-xs font-bold rounded-xl transition-all duration-300 ${viewMode === 'dashboard' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               >
-                VAULT
+                <History size={14} />
+                Vault
               </button>
-            </div>
-            
-            <div className="flex items-center gap-6 border-l border-[#1a1a1a] pl-8">
-              <div className="text-right hidden sm:block">
-                <p className="text-[10px] font-bold text-white uppercase">{currentProfile.name}</p>
-                <p className="text-[9px] text-[#00ff9d] font-black tracking-widest">CREDITS: {currentProfile.credits}</p>
+            </nav>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <div className="hidden lg:flex items-center gap-4 bg-muted/30 px-4 py-2 rounded-2xl border border-border/50">
+              <div className="flex flex-col items-end">
+                <span className="text-xs font-bold">{currentProfile.name}</span>
+                <span className="text-[10px] font-bold text-brand-600 flex items-center gap-1">
+                  <CreditCard size={10} /> {currentProfile.credits} Credits
+                </span>
               </div>
+            </div>
+
+            <div className="flex items-center gap-2">
               <button 
-                onClick={() => supabase.auth.signOut()}
-                className="w-10 h-10 rounded-sm border border-[#1a1a1a] hover:bg-red-500/10 hover:border-red-500 hover:text-red-500 transition-all flex items-center justify-center text-zinc-600"
+                onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+                className="w-10 h-10 rounded-2xl hover:bg-muted transition-colors flex items-center justify-center text-muted-foreground"
+                title="Toggle Theme"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+              </button>
+              <button 
+                onClick={handleSignOut}
+                className="w-10 h-10 rounded-2xl hover:bg-destructive/10 hover:text-destructive transition-colors flex items-center justify-center text-muted-foreground"
+                title="Sign Out"
+              >
+                <LogOut size={20} />
               </button>
             </div>
           </div>
         </div>
-      </nav>
+      </header>
 
-      <main className="max-w-[1440px] mx-auto px-8 py-16">
+      <main className="pt-36 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         {viewMode === 'uploader' && (
-          <div className="animate-in fade-in slide-in-from-bottom-12 duration-1000">
-            <div className="mb-20">
-               <span className="text-[10px] font-black text-[#00ff9d] uppercase tracking-[0.5em] mb-4 block">INSTITUTIONAL GRADE EVALUATION</span>
-               <h2 className="text-6xl lg:text-8xl font-black tracking-tighter mb-8 leading-[0.9]">
-                 AUTOMATE <br /> <span className="text-[#00ff9d] neon-text">EVERY SCRIPT.</span>
-               </h2>
-               <div className="max-w-xl h-1 bg-[#1a1a1a] rounded-full overflow-hidden">
-                 <div className="h-full bg-[#00ff9d] w-24 neon-glow"></div>
-               </div>
+          <div className="animate-fade-in">
+            <div className="max-w-4xl mx-auto mb-16 text-center">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-500/10 text-brand-600 text-[10px] font-bold uppercase tracking-widest mb-6 border border-brand-500/20">
+                <Sparkles size={12} />
+                Powered by Gemini 3.1 Pro
+              </div>
+              <h1 className="text-5xl md:text-6xl font-black tracking-tight mb-6 leading-[1.1]">
+                Precision Grading <br />
+                <span className="text-brand-500">Simplified.</span>
+              </h1>
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto font-medium">
+                Upload your institutional documents and let our advanced AI models handle the auditing with professional accuracy.
+              </p>
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-12 items-start">
-              <div className="xl:col-span-8 space-y-12">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                  <FileUpload label="QUESTION PAPER" files={qpFiles} onFilesSelected={(f) => handleFileSelection(f, setQpFiles)} required />
-                  <FileUpload label="ANSWER KEY" files={keyFiles} onFilesSelected={(f) => handleFileSelection(f, setKeyFiles)} />
+            {error && (
+              <div className="max-w-4xl mx-auto mb-10 p-5 bg-destructive/10 border border-destructive/20 text-destructive rounded-3xl flex items-center gap-4 text-sm font-semibold animate-fade-in">
+                <div className="w-10 h-10 rounded-2xl bg-destructive/10 flex items-center justify-center shrink-0">
+                  <AlertCircle size={20} />
                 </div>
-                <FileUpload label="STUDENT ANSWER SHEETS" files={studentFiles} onFilesSelected={(f) => handleFileSelection(f, setStudentFiles)} required />
+                {error}
               </div>
+            )}
 
-              <div className="xl:col-span-4 sticky top-32">
-                <div className="pro-card p-10 rounded-sm">
-                  <h3 className="text-[10px] font-black uppercase tracking-[0.3em] mb-10 text-zinc-500">SYSTEM_SUMMARY</h3>
-                  <div className="space-y-6 mb-12">
-                    <div className="flex justify-between items-center py-3 border-b border-[#1a1a1a]">
-                      <span className="text-[9px] font-bold text-zinc-500 uppercase">BATCH_SIZE</span>
-                      <span className="text-[11px] font-black text-white">{studentFiles.length} SCRIPTS</span>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 max-w-6xl mx-auto">
+              <div className="lg:col-span-7 space-y-10">
+                <FileUpload 
+                  label="Question Paper" 
+                  files={qpFiles} 
+                  onFilesSelected={(f) => handleFileSelection(f, setQpFiles)} 
+                  required
+                />
+                <FileUpload 
+                  label="Answer Key (Optional)" 
+                  files={keyFiles} 
+                  onFilesSelected={(f) => handleFileSelection(f, setKeyFiles)} 
+                />
+              </div>
+              <div className="lg:col-span-5 space-y-10">
+                <FileUpload 
+                  label="Student Scripts" 
+                  files={studentFiles} 
+                  onFilesSelected={(f) => handleFileSelection(f, setStudentFiles)} 
+                  required
+                />
+                
+                <div className="bg-card text-card-foreground rounded-3xl border border-border/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-500 hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] hover:border-brand-500/20 p-8 bg-foreground text-background dark:bg-card dark:text-card-foreground">
+                  <h3 className="text-xs font-bold uppercase tracking-widest mb-8 opacity-60">Evaluation Summary</h3>
+                  <div className="space-y-6 mb-10">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium opacity-70">Total Scripts</span>
+                      <span className="text-lg font-bold">{studentFiles.length}</span>
                     </div>
-                    <div className="flex justify-between items-center py-3 border-b border-[#1a1a1a]">
-                      <span className="text-[9px] font-bold text-zinc-500 uppercase">COMPUTE_COST</span>
-                      <span className="text-[11px] font-black text-[#00ff9d]">1 CREDIT</span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium opacity-70">Compute Cost</span>
+                      <span className="text-lg font-bold text-brand-500">1 Credit</span>
                     </div>
-                    <div className="flex justify-between items-center py-3 border-b border-[#1a1a1a]">
-                      <span className="text-[9px] font-bold text-zinc-500 uppercase">LATENCY_EST</span>
-                      <span className="text-[11px] font-black text-white">~15 SEC</span>
+                    <div className="h-[1px] bg-background/10 dark:bg-border"></div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium opacity-70">Estimated Time</span>
+                      <span className="text-lg font-bold">~15s</span>
                     </div>
                   </div>
-
-                  {error && (
-                    <div className="mb-8 p-4 bg-red-500/10 border border-red-500/30 text-red-500 text-[10px] font-black uppercase tracking-widest animate-shake">
-                      {error}
-                    </div>
-                  )}
 
                   <button 
                     onClick={processEvaluation}
                     disabled={isLoading || qpFiles.length === 0 || studentFiles.length === 0}
-                    className={`w-full py-6 rounded-sm btn-pro text-[11px] ${isLoading || qpFiles.length === 0 || studentFiles.length === 0 ? 'opacity-20 grayscale cursor-not-allowed' : ''}`}
+                    className="w-full inline-flex items-center justify-center rounded-2xl px-6 py-3 text-sm font-semibold transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:pointer-events-none bg-brand-500 text-white hover:bg-brand-600 shadow-lg shadow-brand-500/20 h-16 text-lg group disabled:opacity-30"
                   >
                     {isLoading ? (
-                      <div className="flex items-center justify-center gap-3">
-                        <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
-                        CORE_PROCESSING...
-                      </div>
+                      <>
+                        <Loader2 className="w-6 h-6 mr-3 animate-spin" />
+                        Processing...
+                      </>
                     ) : (
-                      'EXECUTE EVALUATION'
+                      <>
+                        Start Evaluation
+                        <ArrowRight size={20} className="ml-2 group-hover:translate-x-1 transition-transform" />
+                      </>
                     )}
                   </button>
                 </div>
               </div>
+            </div>
+
+            <div className="mt-24 grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-5xl mx-auto">
+              {[
+                { icon: ShieldCheck, title: "Institutional Grade", desc: "Security-first architecture designed for sensitive academic data." },
+                { icon: Zap, title: "Instant Audit", desc: "Real-time processing with detailed question-level feedback." },
+                { icon: FileText, title: "Export Ready", desc: "Generate professional PDF reports for institutional records." }
+              ].map((feature, i) => (
+                <div key={i} className="bg-card text-card-foreground rounded-3xl border border-border/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-500 hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] hover:border-brand-500/20 p-8 text-center group">
+                  <div className="w-14 h-14 bg-brand-500/10 text-brand-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-500">
+                    <feature.icon size={28} />
+                  </div>
+                  <h3 className="font-bold text-lg mb-3">{feature.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{feature.desc}</p>
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -282,7 +375,7 @@ const App: React.FC = () => {
         {viewMode === 'dashboard' && (
           <Dashboard 
             history={history} 
-            profile={currentProfile}
+            profile={currentProfile} 
             onViewReport={(item) => { setCurrentReport(item.report); setViewMode('report'); }}
             onDeleteReport={deleteReport}
             onNewEvaluation={() => setViewMode('uploader')}
@@ -290,18 +383,25 @@ const App: React.FC = () => {
         )}
 
         {viewMode === 'report' && currentReport && (
-          <EvaluationReportView report={currentReport} onReset={() => setViewMode('uploader')} />
+          <EvaluationReportView 
+            report={currentReport} 
+            onReset={() => { setViewMode('uploader'); setCurrentReport(null); }} 
+          />
         )}
       </main>
 
-      <footer className="py-24 border-t border-[#1a1a1a] text-center no-print">
-        <div className="flex flex-col items-center gap-4">
-          <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.4em]">
-            Developed from the minds of <span className="text-[#00ff9d] neon-text">Aarshiv.ai</span>
-          </p>
-          <p className="text-[8px] font-bold text-zinc-800 uppercase tracking-[0.8em]">
-            NEXTGENEVAL • INSTITUTIONAL CORE v2.5 • © 2024
-          </p>
+      <footer className="border-t border-border/50 py-16 no-print">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <div className="w-8 h-8 bg-brand-500 rounded-xl flex items-center justify-center text-white font-bold text-sm">N</div>
+            <span className="font-bold tracking-tight text-xl">NextGenEval</span>
+          </div>
+          <p className="text-sm text-muted-foreground mb-8">Empowering institutions with high-precision AI evaluation.</p>
+          <div className="flex items-center justify-center gap-8 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">
+            <span>Privacy Policy</span>
+            <span>Terms of Service</span>
+            <span>Security Audit</span>
+          </div>
         </div>
       </footer>
     </div>

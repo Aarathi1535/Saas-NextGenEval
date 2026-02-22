@@ -1,7 +1,26 @@
-
 import React, { useState, useEffect } from 'react';
 import { HistoryItem, UserProfile } from '../types';
 import { supabase } from '../supabase';
+import { 
+  History, 
+  ShieldCheck, 
+  CreditCard, 
+  Plus, 
+  Eye, 
+  Trash2, 
+  Users, 
+  TrendingUp,
+  Search,
+  ChevronRight,
+  MoreVertical,
+  ArrowUpRight,
+  ArrowDownRight,
+  Loader2,
+  Calendar,
+  BookOpen,
+  FileText,
+  AlertCircle
+} from 'lucide-react';
 
 const ADMIN_EMAIL = 'aarshiv.ai@gmail.com';
 
@@ -16,9 +35,9 @@ interface DashboardProps {
 const Dashboard: React.FC<DashboardProps> = ({ history, profile, onViewReport, onDeleteReport, onNewEvaluation }) => {
   const [activeTab, setActiveTab] = useState<'history' | 'admin'>('history');
   const [allUsers, setAllUsers] = useState<UserProfile[]>([]);
-  const [allEvaluations, setAllEvaluations] = useState<any[]>([]);
   const [loadingAdmin, setLoadingAdmin] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const isSystemAdmin = profile.email === ADMIN_EMAIL;
 
@@ -32,9 +51,7 @@ const Dashboard: React.FC<DashboardProps> = ({ history, profile, onViewReport, o
     setLoadingAdmin(true);
     try {
       const { data: users } = await supabase.from('profiles').select('*').order('joinedDate', { ascending: false });
-      const { data: evals } = await supabase.from('evaluations').select('*, profiles(name)');
       if (users) setAllUsers(users);
-      if (evals) setAllEvaluations(evals);
     } catch (err) {
       console.error("Admin fetch error", err);
     } finally {
@@ -56,7 +73,6 @@ const Dashboard: React.FC<DashboardProps> = ({ history, profile, onViewReport, o
 
       if (error) throw error;
       
-      // Update local state
       setAllUsers(prev => prev.map(u => u.id === userId ? { ...u, credits: newCredits } : u));
     } catch (err) {
       console.error("Failed to adjust credits", err);
@@ -65,114 +81,187 @@ const Dashboard: React.FC<DashboardProps> = ({ history, profile, onViewReport, o
     }
   };
 
+  const filteredHistory = history.filter(item => 
+    item.report.studentInfo.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.report.studentInfo.subject.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16">
-        <div className="lg:col-span-8 pro-card p-12 rounded-sm flex flex-col md:flex-row items-center justify-between gap-12 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-48 h-48 bg-[#00ff9d]/5 rounded-full blur-3xl -translate-y-24 translate-x-24"></div>
-          <div className="flex-1 relative z-10">
-            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600 mb-3">INSTITUTIONAL_CREDITS</p>
-            <h2 className="text-7xl font-black neon-text mb-10">{isSystemAdmin ? 'UNLIMITED' : profile.credits}</h2>
-            <div className="flex gap-4">
-              <button className="px-8 py-3 btn-pro rounded-sm text-[10px]">ADD_CREDITS</button>
-              <button className="px-8 py-3 border border-[#1a1a1a] text-zinc-500 rounded-sm text-[10px] font-black uppercase tracking-widest hover:border-[#00ff9d] hover:text-[#00ff9d] transition-all">BILLING_HIST</button>
-            </div>
+    <div className="animate-fade-in space-y-10">
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="bg-card text-card-foreground rounded-3xl border border-border/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-500 hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] hover:border-brand-500/20 p-8 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-8 text-brand-500/10 group-hover:scale-110 transition-transform duration-500">
+            <CreditCard size={80} />
           </div>
-          <div className="text-right hidden md:block relative z-10">
-            <p className="text-[10px] font-black uppercase text-zinc-600 mb-2">NETWORK_RATE</p>
-            <p className="text-4xl font-bold text-white tracking-tighter">$0.50 <span className="text-[10px] text-zinc-600">/ SHEET</span></p>
+          <div className="relative z-10">
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4">Available Credits</p>
+            <div className="flex items-baseline gap-2">
+              <h3 className="text-4xl font-black tracking-tight">{isSystemAdmin ? '∞' : profile.credits}</h3>
+              <span className="text-xs font-bold text-brand-600">UNITS</span>
+            </div>
+            <div className="mt-6 flex items-center gap-2 text-[10px] font-bold text-emerald-500 bg-emerald-500/10 w-fit px-3 py-1 rounded-full border border-emerald-500/20">
+              <ShieldCheck size={12} />
+              Verified Balance
+            </div>
           </div>
         </div>
 
-        <div className="lg:col-span-4 pro-card p-12 rounded-sm flex flex-col justify-between">
-           <div>
-             <p className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600 mb-3">TOTAL_OUTPUT</p>
-             <h3 className="text-4xl font-black text-white">{profile.totalEvaluations} AUDITS</h3>
-           </div>
-           <div className="mt-10">
-              <div className="flex justify-between text-[10px] font-black uppercase mb-4">
-                <span className="text-zinc-600 tracking-widest">SYSTEM_LINK</span>
-                <span className="text-[#00ff9d] animate-pulse">OPTIMIZED</span>
-              </div>
-              <div className="w-full h-1 bg-[#1a1a1a] rounded-full">
-                 <div className="h-full bg-[#00ff9d] shadow-[0_0_15px_rgba(0,255,157,0.4)] w-full"></div>
-              </div>
-           </div>
+        <div className="bg-card text-card-foreground rounded-3xl border border-border/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-500 hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] hover:border-brand-500/20 p-8 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-8 text-brand-500/10 group-hover:scale-110 transition-transform duration-500">
+            <TrendingUp size={80} />
+          </div>
+          <div className="relative z-10">
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4">Total Audits</p>
+            <div className="flex items-baseline gap-2">
+              <h3 className="text-4xl font-black tracking-tight">{profile.totalEvaluations}</h3>
+              <span className="text-xs font-bold text-brand-600">RECORDS</span>
+            </div>
+            <div className="mt-6 flex items-center gap-2 text-[10px] font-bold text-brand-600 bg-brand-500/10 w-fit px-3 py-1 rounded-full border border-brand-500/20">
+              <History size={12} />
+              Lifetime Activity
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-card text-card-foreground rounded-3xl border border-border/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-500 hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] hover:border-brand-500/20 p-8 bg-brand-500 text-white relative overflow-hidden group border-none">
+          <div className="absolute top-0 right-0 p-8 text-white/10 group-hover:scale-110 transition-transform duration-500">
+            <Plus size={80} />
+          </div>
+          <div className="relative z-10 h-full flex flex-col justify-between">
+            <div>
+              <p className="text-xs font-bold opacity-70 uppercase tracking-widest mb-4">Quick Action</p>
+              <h3 className="text-2xl font-bold leading-tight">Ready to evaluate <br />a new batch?</h3>
+            </div>
+            <button 
+              onClick={onNewEvaluation}
+              className="mt-8 w-full bg-white text-brand-600 rounded-2xl py-4 text-sm font-black uppercase tracking-widest hover:bg-white/90 transition-all shadow-xl shadow-black/10 active:scale-95"
+            >
+              Start New Batch
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-8">
-        <div className="flex gap-1 p-1 bg-[#0a0a0a] border border-[#1a1a1a] rounded-sm">
-           <button 
-             onClick={() => setActiveTab('history')}
-             className={`px-8 py-3 rounded-sm text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'history' ? 'bg-[#141414] text-[#00ff9d] neon-text shadow-xl' : 'text-zinc-600 hover:text-white'}`}
-           >
-             VAULT_RECORDS
-           </button>
-           {isSystemAdmin && (
-             <button 
-               onClick={() => setActiveTab('admin')}
-               className={`px-8 py-3 rounded-sm text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'admin' ? 'bg-[#141414] text-[#00ff9d] neon-text shadow-xl' : 'text-zinc-600 hover:text-white'}`}
-             >
-               SYSTEM_CREATOR
-             </button>
-           )}
-        </div>
-        <button 
-          onClick={onNewEvaluation}
-          disabled={!isSystemAdmin && profile.credits <= 0}
-          className={`px-10 py-5 rounded-sm btn-pro shadow-2xl flex items-center gap-4 text-[10px] ${!isSystemAdmin && profile.credits <= 0 ? 'opacity-20 grayscale cursor-not-allowed' : ''}`}
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M12 4v16m8-8H4" /></svg>
-          INITIALIZE_BATCH
-        </button>
-      </div>
+      {/* Main Content Section */}
+      <div className="bg-card text-card-foreground rounded-3xl border border-border/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-500 hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] hover:border-brand-500/20 overflow-hidden">
+        <div className="p-8 border-b border-border/50 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="flex items-center gap-2 p-1.5 bg-muted rounded-2xl w-fit border border-border/50">
+            <button 
+              onClick={() => setActiveTab('history')}
+              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 ${activeTab === 'history' ? 'bg-background shadow-lg text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+            >
+              <FileText size={14} />
+              Evaluation Vault
+            </button>
+            {isSystemAdmin && (
+              <button 
+                onClick={() => setActiveTab('admin')}
+                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 ${activeTab === 'admin' ? 'bg-background shadow-lg text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+              >
+                <Users size={14} />
+                Admin Panel
+              </button>
+            )}
+          </div>
 
-      <div className="pro-card rounded-sm overflow-hidden">
-        {activeTab === 'history' ? (
-          history.length === 0 ? (
-            <div className="py-40 text-center">
-              <p className="text-zinc-800 font-black uppercase text-[10px] tracking-[1em]">VAULT_EMPTY</p>
+          {activeTab === 'history' && (
+            <div className="relative group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-brand-500 transition-colors" size={18} />
+              <input 
+                type="text" 
+                placeholder="Search by student or subject..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="flex h-14 w-full rounded-2xl border border-border bg-background/50 px-5 py-2 text-sm transition-all duration-300 placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 pl-12 w-full lg:w-80 h-12"
+              />
             </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
+          )}
+        </div>
+
+        <div className="overflow-x-auto">
+          {activeTab === 'history' ? (
+            filteredHistory.length === 0 ? (
+              <div className="py-32 text-center">
+                <div className="w-20 h-20 bg-muted rounded-3xl flex items-center justify-center mx-auto mb-6 text-muted-foreground/30">
+                  <History size={32} />
+                </div>
+                <h3 className="font-bold text-xl mb-2">No records found</h3>
+                <p className="text-muted-foreground text-sm max-w-xs mx-auto leading-relaxed">Your evaluation history will appear here once you complete your first audit.</p>
+                <button 
+                  onClick={onNewEvaluation}
+                  className="mt-8 text-brand-600 font-bold text-sm hover:underline"
+                >
+                  Start your first evaluation
+                </button>
+              </div>
+            ) : (
+              <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-[#0f0f0f] text-zinc-600 text-[9px] font-black uppercase tracking-[0.2em] border-b border-[#1a1a1a]">
-                    <th className="px-10 py-6">IDENTIFIER</th>
-                    <th className="px-10 py-6">COURSE_CODE</th>
-                    <th className="px-10 py-6 text-center">PRECISION_SCORE</th>
-                    <th className="px-10 py-6 text-center">PAGES</th>
-                    <th className="px-10 py-6 text-right">OPERATIONS</th>
+                  <tr className="bg-muted/30 text-muted-foreground text-[10px] font-bold uppercase tracking-widest border-b border-border/50">
+                    <th className="px-8 py-5">Student Identity</th>
+                    <th className="px-8 py-5">Course / Subject</th>
+                    <th className="px-8 py-5 text-center">Performance</th>
+                    <th className="px-8 py-5 text-center">Pages</th>
+                    <th className="px-8 py-5 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#1a1a1a]">
-                  {history.map((item) => (
-                    <tr key={item.id} className="hover:bg-[#0d0d0d] transition-colors">
-                      <td className="px-10 py-8">
-                        <p className="font-bold text-white text-[13px] tracking-tight mb-1 uppercase">{item.report.studentInfo.name}</p>
-                        <p className="text-[9px] text-zinc-700 font-black uppercase tracking-wider">{new Date(item.timestamp).toLocaleString()}</p>
+                <tbody className="divide-y divide-border/50">
+                  {filteredHistory.map((item) => (
+                    <tr key={item.id} className="hover:bg-muted/20 transition-colors group">
+                      <td className="px-8 py-6">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-xl bg-brand-500/10 text-brand-600 flex items-center justify-center font-bold text-xs">
+                            {item.report.studentInfo.name.charAt(0)}
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="font-bold text-sm group-hover:text-brand-600 transition-colors">{item.report.studentInfo.name}</span>
+                            <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-medium mt-0.5">
+                              <Calendar size={10} />
+                              {new Date(item.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                            </div>
+                          </div>
+                        </div>
                       </td>
-                      <td className="px-10 py-8">
-                        <span className="px-3 py-1 bg-black border border-[#1a1a1a] rounded-sm text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
-                          {item.report.studentInfo.subject}
-                        </span>
+                      <td className="px-8 py-6">
+                        <div className="flex items-center gap-2">
+                          <BookOpen size={14} className="text-muted-foreground" />
+                          <span className="text-xs font-bold text-muted-foreground uppercase tracking-tight">
+                            {item.report.studentInfo.subject}
+                          </span>
+                        </div>
                       </td>
-                      <td className="px-10 py-8 text-center">
-                        <span className={`font-black text-[15px] ${item.report.percentage >= 40 ? 'text-[#00ff9d] neon-text' : 'text-red-500'}`}>
-                          {item.report.percentage.toFixed(1)}%
-                        </span>
+                      <td className="px-8 py-6">
+                        <div className="flex flex-col items-center gap-2">
+                          <span className={`font-black text-lg leading-none ${item.report.percentage >= 40 ? 'text-emerald-500' : 'text-destructive'}`}>
+                            {item.report.percentage.toFixed(1)}%
+                          </span>
+                          <div className="w-20 h-1.5 bg-muted rounded-full overflow-hidden">
+                            <div 
+                              className={`h-full transition-all duration-1000 ${item.report.percentage >= 40 ? 'bg-emerald-500' : 'bg-destructive'}`} 
+                              style={{ width: `${item.report.percentage}%` }}
+                            />
+                          </div>
+                        </div>
                       </td>
-                      <td className="px-10 py-8 text-center font-bold text-zinc-600 text-[11px]">
+                      <td className="px-8 py-6 text-center font-bold text-muted-foreground text-xs">
                         {item.pages_processed}
                       </td>
-                      <td className="px-10 py-8 text-right">
-                        <div className="flex justify-end gap-3">
-                          <button onClick={() => onViewReport(item)} className="w-10 h-10 rounded-sm border border-[#1a1a1a] flex items-center justify-center text-zinc-600 hover:text-[#00ff9d] hover:border-[#00ff9d] transition-all">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                      <td className="px-8 py-6 text-right">
+                        <div className="flex justify-end gap-2">
+                          <button 
+                            onClick={() => onViewReport(item)} 
+                            className="w-10 h-10 rounded-xl hover:bg-brand-500 hover:text-white transition-all duration-300 text-muted-foreground flex items-center justify-center border border-transparent hover:shadow-lg hover:shadow-brand-500/20"
+                            title="View Detailed Report"
+                          >
+                            <Eye size={18} />
                           </button>
-                          <button onClick={() => onDeleteReport(item.id)} className="w-10 h-10 rounded-sm border border-[#1a1a1a] flex items-center justify-center text-zinc-800 hover:text-red-500 hover:border-red-500 transition-all">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                          <button 
+                            onClick={() => onDeleteReport(item.id)} 
+                            className="w-10 h-10 rounded-xl hover:bg-destructive hover:text-white transition-all duration-300 text-muted-foreground flex items-center justify-center border border-transparent hover:shadow-lg hover:shadow-destructive/20"
+                            title="Delete Record"
+                          >
+                            <Trash2 size={18} />
                           </button>
                         </div>
                       </td>
@@ -180,60 +269,73 @@ const Dashboard: React.FC<DashboardProps> = ({ history, profile, onViewReport, o
                   ))}
                 </tbody>
               </table>
-            </div>
-          )
-        ) : (
-          <div className="overflow-x-auto">
-             <table className="w-full text-left">
+            )
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-[#0f0f0f] text-zinc-600 text-[9px] font-black uppercase tracking-[0.2em] border-b border-[#1a1a1a]">
-                     <th className="px-10 py-6">ENTITY_NAME</th>
-                     <th className="px-10 py-6">RANK</th>
-                     <th className="px-10 py-6">CREDIT_CAP</th>
-                     <th className="px-10 py-6 text-center">TOTAL_AUDITS</th>
-                     <th className="px-10 py-6 text-right">ADMIN_ACTIONS</th>
+                  <tr className="bg-muted/30 text-muted-foreground text-[10px] font-bold uppercase tracking-widest border-b border-border/50">
+                    <th className="px-8 py-5">Institution Entity</th>
+                    <th className="px-8 py-5">Access Level</th>
+                    <th className="px-8 py-5 text-center">Credit Balance</th>
+                    <th className="px-8 py-5 text-center">Total Audits</th>
+                    <th className="px-8 py-5 text-right">Administrative Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#1a1a1a] text-[12px]">
+                <tbody className="divide-y divide-border/50">
                   {allUsers.map(user => (
-                    <tr key={user.id} className={`hover:bg-[#0d0d0d] transition-colors ${user.email === ADMIN_EMAIL ? 'bg-[#00ff9d]/5' : ''}`}>
-                      <td className="px-10 py-7">
-                        <p className="font-bold text-white uppercase tracking-tight">{user.name || '---'}</p>
-                        <p className="text-[9px] text-zinc-700 font-black">{user.email}</p>
+                    <tr key={user.id} className={`hover:bg-muted/20 transition-colors ${user.email === ADMIN_EMAIL ? 'bg-brand-500/5' : ''}`}>
+                      <td className="px-8 py-6">
+                        <div className="flex flex-col">
+                          <span className="font-bold text-sm">{user.name || 'Unnamed Institution'}</span>
+                          <span className="text-xs text-muted-foreground font-medium">{user.email}</span>
+                        </div>
                       </td>
-                      <td className="px-10 py-7">
-                        <span className={`px-2 py-0.5 rounded-sm text-[9px] font-black uppercase ${user.role === 'admin' ? 'bg-[#00ff9d] text-black' : 'bg-[#1a1a1a] text-zinc-600'}`}>{user.role}</span>
+                      <td className="px-8 py-6">
+                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${user.role === 'admin' ? 'bg-brand-500 text-white' : 'bg-muted text-muted-foreground'}`}>
+                          {user.role === 'admin' && <ShieldCheck size={10} />}
+                          {user.role}
+                        </span>
                       </td>
-                      <td className="px-10 py-7 font-black text-[#00ff9d] tracking-tighter text-sm">
-                        {user.email === ADMIN_EMAIL ? '∞' : user.credits}
+                      <td className="px-8 py-6 text-center">
+                        <span className="font-black text-brand-600 text-lg tracking-tight">
+                          {user.email === ADMIN_EMAIL ? '∞' : user.credits}
+                        </span>
                       </td>
-                      <td className="px-10 py-7 text-center font-bold text-white text-sm">{user.totalEvaluations}</td>
-                      <td className="px-10 py-7 text-right">
+                      <td className="px-8 py-6 text-center font-bold text-sm">{user.totalEvaluations}</td>
+                      <td className="px-8 py-6 text-right">
                         {user.email !== ADMIN_EMAIL && (
-                          <div className="flex justify-end gap-2">
-                             <button 
-                               onClick={() => handleAdjustCredits(user.id, 50)}
-                               disabled={actionLoading === user.id}
-                               className="px-3 py-1 border border-[#1a1a1a] hover:border-[#00ff9d] hover:text-[#00ff9d] rounded text-[9px] font-black uppercase transition-all disabled:opacity-50"
-                             >
-                               +50
-                             </button>
-                             <button 
-                               onClick={() => handleAdjustCredits(user.id, -50)}
-                               disabled={actionLoading === user.id}
-                               className="px-3 py-1 border border-[#1a1a1a] hover:border-red-500 hover:text-red-500 rounded text-[9px] font-black uppercase transition-all disabled:opacity-50"
-                             >
-                               -50
-                             </button>
+                          <div className="flex justify-end gap-3">
+                            <button 
+                              onClick={() => handleAdjustCredits(user.id, 50)}
+                              disabled={actionLoading === user.id}
+                              className="px-4 py-2 bg-muted hover:bg-brand-500 hover:text-white rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all disabled:opacity-50 shadow-sm"
+                            >
+                              +50 Credits
+                            </button>
+                            <button 
+                              onClick={() => handleAdjustCredits(user.id, -50)}
+                              disabled={actionLoading === user.id}
+                              className="px-4 py-2 bg-muted hover:bg-destructive hover:text-white rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all disabled:opacity-50 shadow-sm"
+                            >
+                              -50 Credits
+                            </button>
                           </div>
                         )}
                       </td>
                     </tr>
                   ))}
                 </tbody>
-             </table>
-          </div>
-        )}
+              </table>
+              {loadingAdmin && (
+                <div className="py-20 flex flex-col items-center justify-center gap-4">
+                  <Loader2 className="w-10 h-10 text-brand-500 animate-spin" />
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Fetching Institution Data</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

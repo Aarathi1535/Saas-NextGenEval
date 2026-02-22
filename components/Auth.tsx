@@ -1,6 +1,16 @@
-
 import React, { useState } from 'react';
 import { supabase } from '../supabase';
+import { 
+  Mail, 
+  Lock, 
+  User, 
+  Building2, 
+  ArrowRight, 
+  ShieldCheck, 
+  AlertCircle,
+  Loader2,
+  CheckCircle2
+} from 'lucide-react';
 
 const ADMIN_EMAIL = 'aarshiv.ai@gmail.com';
 
@@ -22,7 +32,6 @@ const Auth: React.FC = () => {
 
     try {
       if (isAdminPortal) {
-        // Strict email check for Admin Portal
         if (email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
           throw new Error('Access Denied: This portal is reserved for the system creator.');
         }
@@ -34,7 +43,6 @@ const Auth: React.FC = () => {
           });
           if (signInError) throw signInError;
         } else {
-          // Allow Admin to sign up if the account doesn't exist yet
           const { data, error: signUpError } = await supabase.auth.signUp({
             email,
             password,
@@ -50,7 +58,7 @@ const Auth: React.FC = () => {
               id: data.user.id,
               name: 'System Creator',
               email: email,
-              credits: 999999, // Admin gets unlimited-ish credits
+              credits: 999999,
               freeTrialUsed: true,
               joinedDate: Date.now(),
               role: 'admin'
@@ -67,7 +75,6 @@ const Auth: React.FC = () => {
           }
         }
       } else {
-        // General Institutional Portal
         if (isLogin) {
           const { error: signInError } = await supabase.auth.signInWithPassword({
             email,
@@ -86,7 +93,6 @@ const Auth: React.FC = () => {
           if (signUpError) throw signUpError;
 
           if (data.user) {
-            // Even if signing up here, if it's the admin email, give them the admin role
             const isCreator = email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
             const { error: profileError } = await supabase.from('profiles').upsert({
               id: data.user.id,
@@ -111,7 +117,7 @@ const Auth: React.FC = () => {
       }
     } catch (err: any) {
       const msg = err.message || 'Authentication failed.';
-      setError(msg.includes('Invalid login credentials') ? 'Invalid credentials. If you haven\'t created an account yet, please use the Sign Up option.' : msg);
+      setError(msg.includes('Invalid login credentials') ? 'Invalid credentials. Please check your email and password.' : msg);
     } finally {
       setLoading(false);
     }
@@ -123,103 +129,135 @@ const Auth: React.FC = () => {
     setSuccess(null);
     setEmail('');
     setPassword('');
-    setIsLogin(true); // Default to login when switching
+    setIsLogin(true);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black p-6">
-      <div className="scanline"></div>
-      <div className="w-full max-w-md bg-[#050505] rounded-sm border border-[#1a1a1a] p-12 lg:p-16 pro-card relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-24 h-24 bg-[#00ff9d]/5 blur-3xl rounded-full translate-x-12 -translate-y-12"></div>
-        
-        <div className="text-center mb-16 relative z-10">
-          <div className="w-16 h-16 bg-[#00ff9d] rounded-sm flex items-center justify-center text-black font-black text-3xl mx-auto mb-8 shadow-[0_0_40px_rgba(0,255,157,0.3)]">N</div>
-          <h1 className="text-4xl font-black text-white tracking-tighter mb-2">
-            {isAdminPortal ? (isLogin ? 'ADMIN LOGIN' : 'ADMIN SIGN UP') : (isLogin ? 'LOGIN' : 'SIGN UP')}
+    <div className="min-h-screen flex items-center justify-center bg-background p-6">
+      <div className="w-full max-w-md animate-fade-in">
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center text-primary-foreground font-bold text-3xl mx-auto mb-6 shadow-xl shadow-primary/20">N</div>
+          <h1 className="text-3xl font-bold tracking-tight mb-2">
+            {isAdminPortal ? 'Admin Portal' : 'NextGenEval'}
           </h1>
-          <p className="text-[#00ff9d] font-black uppercase tracking-[0.4em] text-[9px] opacity-70">
-            {isAdminPortal ? 'SYSTEM CREATOR ACCESS' : 'INSTITUTIONAL PORTAL'}
+          <p className="text-muted-foreground">
+            {isAdminPortal 
+              ? 'System creator access only' 
+              : isLogin ? 'Welcome back to your dashboard' : 'Start your institutional journey'}
           </p>
         </div>
 
-        {error && (
-          <div className="mb-10 p-4 bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-black uppercase tracking-widest text-center animate-shake">
-            {error}
-          </div>
-        )}
-
-        {success && (
-          <div className="mb-10 p-4 bg-emerald-500/10 border border-emerald-500/20 text-[#00ff9d] text-[10px] font-black uppercase tracking-widest text-center">
-            {success}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-8 relative z-10">
-          {!isLogin && !isAdminPortal && (
-            <div className="space-y-3">
-              <label className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Institution Name</label>
-              <input 
-                type="text" 
-                required 
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                disabled={loading}
-                className="w-full px-5 py-5 input-pro rounded-sm text-xs font-bold disabled:opacity-50"
-                placeholder="ST. MARY'S ACADEMY"
-              />
+        <div className="bg-card text-card-foreground rounded-3xl border border-border/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-500 hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] hover:border-brand-500/20 p-8 sm:p-10">
+          {error && (
+            <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl flex items-center gap-3 text-sm font-medium">
+              <AlertCircle size={18} />
+              {error}
             </div>
           )}
-          <div className="space-y-3">
-            <label className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Email Address</label>
-            <input 
-              type="email" 
-              required 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={loading}
-              className="w-full px-5 py-5 input-pro rounded-sm text-xs font-bold disabled:opacity-50"
-              placeholder={isAdminPortal ? "aarshiv.ai@gmail.com" : "admin@institution.edu"}
-            />
-          </div>
-          <div className="space-y-3">
-            <label className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Password</label>
-            <input 
-              type="password" 
-              required 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={loading}
-              className="w-full px-5 py-5 input-pro rounded-sm text-xs font-bold disabled:opacity-50"
-              placeholder="••••••••"
-            />
-          </div>
 
-          <button 
-            type="submit"
-            disabled={loading}
-            className="w-full py-6 btn-pro rounded-sm mt-8 disabled:opacity-50 flex items-center justify-center gap-3"
-          >
-            {loading && <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />}
-            {isLogin ? 'Login' : 'Sign Up'}
-          </button>
-        </form>
+          {success && (
+            <div className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 rounded-2xl flex items-center gap-3 text-sm font-medium">
+              <CheckCircle2 size={18} />
+              {success}
+            </div>
+          )}
 
-        <div className="mt-12 text-center relative z-10 space-y-4">
-          <button 
-            onClick={() => { setIsLogin(!isLogin); setError(null); setSuccess(null); }}
-            disabled={loading}
-            className="text-zinc-700 font-black text-[9px] uppercase tracking-[0.2em] hover:text-[#00ff9d] transition-colors block w-full"
-          >
-            {isLogin ? "Need an account? Sign Up" : "Already have an account? Login"}
-          </button>
-          
-          <button 
-            onClick={toggleAdmin}
-            disabled={loading}
-            className="text-zinc-800 font-black text-[8px] uppercase tracking-[0.3em] hover:text-[#00ff9d] transition-all opacity-40 hover:opacity-100"
-          >
-            {isAdminPortal ? "Institutional Portal" : "Creator Admin Portal"}
-          </button>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {!isLogin && !isAdminPortal && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium ml-1">Institution Name</label>
+                <div className="relative">
+                  <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+                  <input 
+                    type="text" 
+                    required 
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    disabled={loading}
+                    className="flex h-14 w-full rounded-2xl border border-border bg-background/50 px-5 py-2 text-sm transition-all duration-300 placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 pl-11"
+                    placeholder="e.g. St. Mary's Academy"
+                  />
+                </div>
+              </div>
+            )}
+            
+            <div className="space-y-2">
+              <label className="text-sm font-medium ml-1">Email Address</label>
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+                <input 
+                  type="email" 
+                  required 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={loading}
+                  className="flex h-14 w-full rounded-2xl border border-border bg-background/50 px-5 py-2 text-sm transition-all duration-300 placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 pl-11"
+                  placeholder="admin@institution.edu"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium ml-1">Password</label>
+              <div className="relative">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+                <input 
+                  type="password" 
+                  required 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={loading}
+                  className="flex h-14 w-full rounded-2xl border border-border bg-background/50 px-5 py-2 text-sm transition-all duration-300 placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 pl-11"
+                  placeholder="••••••••"
+                />
+              </div>
+            </div>
+
+            <button 
+              type="submit"
+              disabled={loading}
+              className="w-full inline-flex items-center justify-center rounded-2xl px-6 py-3 text-sm font-semibold transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:pointer-events-none bg-foreground text-background hover:opacity-90 shadow-lg shadow-foreground/10 h-14 mt-4 shadow-lg shadow-primary/10"
+            >
+              {loading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <span className="flex items-center gap-2">
+                  {isLogin ? 'Sign In' : 'Create Account'}
+                  <ArrowRight size={18} />
+                </span>
+              )}
+            </button>
+          </form>
+
+          <div className="mt-8 pt-8 border-t border-border space-y-4">
+            <button 
+              onClick={() => { setIsLogin(!isLogin); setError(null); setSuccess(null); }}
+              disabled={loading}
+              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors block w-full text-center"
+            >
+              {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Sign In"}
+            </button>
+            
+            <button 
+              onClick={toggleAdmin}
+              disabled={loading}
+              className="text-xs font-semibold text-muted-foreground/50 hover:text-primary transition-all block w-full text-center"
+            >
+              {isAdminPortal ? "Switch to Institutional Portal" : "Access Creator Admin Portal"}
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-8 flex items-center justify-center gap-6 text-muted-foreground/40">
+          <div className="flex items-center gap-1">
+            <ShieldCheck size={14} />
+            <span className="text-[10px] font-bold uppercase tracking-wider">Secure Access</span>
+          </div>
+          <div className="w-1 h-1 rounded-full bg-border"></div>
+          <div className="flex items-center gap-1">
+            <CheckCircle2 size={14} />
+            <span className="text-[10px] font-bold uppercase tracking-wider">AI Verified</span>
+          </div>
         </div>
       </div>
     </div>

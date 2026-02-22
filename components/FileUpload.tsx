@@ -1,6 +1,17 @@
-
 import React from 'react';
 import { UploadedFile } from '../types';
+import { 
+  Upload, 
+  File, 
+  X, 
+  CheckCircle2, 
+  AlertCircle, 
+  Image as ImageIcon,
+  FileText,
+  CloudUpload,
+  Info,
+  Loader2
+} from 'lucide-react';
 
 interface FileUploadProps {
   label: string;
@@ -18,26 +29,41 @@ const FileUpload: React.FC<FileUploadProps> = ({ label, onFilesSelected, files, 
   };
 
   return (
-    <div className="w-full">
-      <div className="flex justify-between items-center mb-3">
-        <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-1">
-          {label} {required && <span className="text-[#00ff9d]">*</span>}
-        </label>
-        <span className="text-[9px] text-zinc-700 font-black uppercase">
-          COUNT: {files.length}
-        </span>
+    <div className="w-full animate-fade-in">
+      <div className="flex justify-between items-center mb-4 px-2">
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-bold text-foreground tracking-tight">
+            {label}
+          </label>
+          {required && (
+            <span className="flex items-center justify-center w-5 h-5 rounded-full bg-destructive/10 text-destructive text-[10px] font-bold">
+              *
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted border border-border/50">
+          <FileText size={10} className="text-muted-foreground" />
+          <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">
+            {files.length} {files.length === 1 ? 'File' : 'Files'}
+          </span>
+        </div>
       </div>
       
       <div className="space-y-4">
-        <label className="relative flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-[#222] rounded-xl cursor-pointer hover:border-[#00ff9d] hover:bg-[#00ff9d]/5 transition-all group bg-[#0a0a0a]">
-          <div className="flex flex-col items-center justify-center p-6 text-center">
-            <div className="w-12 h-12 bg-black border border-[#222] rounded flex items-center justify-center mb-3 group-hover:neon-glow group-hover:border-[#00ff9d] transition-all">
-              <svg className="w-6 h-6 text-zinc-600 group-hover:text-[#00ff9d] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-              </svg>
+        <label className="relative flex flex-col items-center justify-center w-full h-56 border-2 border-dashed border-border rounded-[2rem] cursor-pointer hover:border-brand-500 hover:bg-brand-500/5 transition-all duration-500 group bg-muted/20 overflow-hidden">
+          {/* Decorative Background Pattern */}
+          <div className="absolute inset-0 opacity-[0.03] pointer-events-none group-hover:opacity-[0.05] transition-opacity">
+            <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
+          </div>
+
+          <div className="relative z-10 flex flex-col items-center justify-center p-8 text-center">
+            <div className="w-16 h-16 bg-background border border-border rounded-3xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 group-hover:border-brand-500 transition-all duration-500 shadow-xl shadow-black/5">
+              <CloudUpload className="w-8 h-8 text-muted-foreground group-hover:text-brand-500 transition-colors" />
             </div>
-            <p className="text-[10px] text-white font-black uppercase tracking-widest">UPLOAD_DOCUMENT</p>
-            <p className="mt-1 text-[8px] text-zinc-600 font-bold uppercase tracking-tighter">MAX_PAYLOAD: 3MB / PDF_IMG</p>
+            <h4 className="text-base font-bold text-foreground mb-2">Drop your documents here</h4>
+            <p className="text-xs text-muted-foreground font-medium max-w-[200px] leading-relaxed">
+              Support for PDF and high-res images up to 3MB each.
+            </p>
           </div>
           <input type="file" className="hidden" multiple={multiple} onChange={handleChange} accept="image/*,application/pdf" />
         </label>
@@ -45,30 +71,52 @@ const FileUpload: React.FC<FileUploadProps> = ({ label, onFilesSelected, files, 
         {files.length > 0 && (
           <div className="grid grid-cols-1 gap-3">
             {files.map((f, idx) => (
-              <div key={idx} className="flex items-center gap-4 p-4 bg-[#0a0a0a] border border-[#1a1a1a] rounded-xl animate-in fade-in slide-in-from-left-2 duration-300">
-                <div className="w-10 h-10 rounded border border-[#222] bg-black flex items-center justify-center text-zinc-500 shrink-0 overflow-hidden">
+              <div key={idx} className="flex items-center gap-4 p-5 bg-card border border-border/50 rounded-3xl animate-fade-in shadow-sm group hover:border-brand-500/30 transition-colors">
+                <div className="w-12 h-12 rounded-2xl border border-border bg-muted flex items-center justify-center text-muted-foreground shrink-0 overflow-hidden shadow-inner">
                   {f.file.type.includes('image') ? (
-                    <img src={f.preview} alt="Preview" className="w-full h-full object-cover opacity-50" />
+                    <img src={f.preview} alt="Preview" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                   ) : (
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 16h1v1h-1v-1zm1-11H7v14h10V9h-4V5zm-1 4h3l-3-3v3z" /></svg>
+                    <FileText size={24} className="group-hover:text-brand-500 transition-colors" />
                   )}
                 </div>
                 <div className="flex-grow min-w-0">
-                  <span className="text-[10px] font-black text-white truncate tracking-tight uppercase block mb-1.5">{f.file.name}</span>
-                  <div className="h-1 w-full bg-[#1a1a1a] rounded-full overflow-hidden">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-bold text-foreground truncate pr-4">{f.file.name}</span>
+                    <span className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-tighter">
+                      {(f.file.size / (1024 * 1024)).toFixed(2)} MB
+                    </span>
+                  </div>
+                  <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                     <div 
-                      className={`h-full transition-all duration-1000 ${f.status === 'complete' ? 'bg-[#00ff9d] neon-glow' : 'bg-white'}`}
+                      className={`h-full transition-all duration-1000 ease-out ${f.status === 'complete' ? 'bg-brand-500' : f.status === 'error' ? 'bg-destructive' : 'bg-brand-400 animate-pulse'}`}
                       style={{ width: `${f.progress}%` }}
                     />
                   </div>
                 </div>
-                {f.status === 'complete' && (
-                  <div className="text-[#00ff9d]">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
-                  </div>
-                )}
+                <div className="shrink-0 ml-2">
+                  {f.status === 'complete' ? (
+                    <div className="w-8 h-8 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+                      <CheckCircle2 size={18} />
+                    </div>
+                  ) : f.status === 'error' ? (
+                    <div className="w-8 h-8 rounded-full bg-destructive/10 text-destructive flex items-center justify-center">
+                      <AlertCircle size={18} />
+                    </div>
+                  ) : (
+                    <div className="w-8 h-8 flex items-center justify-center">
+                      <Loader2 className="w-6 h-6 text-brand-500 animate-spin" />
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {files.length === 0 && (
+          <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-brand-500/5 border border-brand-500/10 text-[10px] font-bold text-brand-700/60 uppercase tracking-widest">
+            <Info size={14} />
+            Mandatory for institutional processing
           </div>
         )}
       </div>
