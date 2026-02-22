@@ -3,6 +3,7 @@ import FileUpload from './components/FileUpload';
 import EvaluationReportView from './components/EvaluationReportView';
 import Dashboard from './components/Dashboard';
 import Auth from './components/Auth';
+import LandingPage from './components/LandingPage';
 import { UploadedFile, EvaluationReport, HistoryItem, UserProfile } from './types';
 import { evaluateAnswerSheet } from './services/geminiService';
 import { supabase } from './supabase';
@@ -33,6 +34,7 @@ type ViewMode = 'uploader' | 'dashboard' | 'report';
 const App: React.FC = () => {
   const [currentProfile, setCurrentProfile] = useState<UserProfile | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [showAuth, setShowAuth] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('uploader');
   const [qpFiles, setQpFiles] = useState<UploadedFile[]>([]);
   const [keyFiles, setKeyFiles] = useState<UploadedFile[]>([]);
@@ -197,7 +199,21 @@ const App: React.FC = () => {
   }
 
   if (!currentProfile) {
-    return <Auth />;
+    if (showAuth) {
+      return (
+        <div className="relative">
+          <button 
+            onClick={() => setShowAuth(false)}
+            className="fixed top-8 left-8 z-[60] flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowRight size={16} className="rotate-180" />
+            Back to Home
+          </button>
+          <Auth />
+        </div>
+      );
+    }
+    return <LandingPage onGetStarted={() => setShowAuth(true)} />;
   }
 
   return (
@@ -238,6 +254,9 @@ const App: React.FC = () => {
           </div>
           
           <div className="flex items-center gap-4">
+            <button className="hidden sm:inline-flex items-center justify-center rounded-2xl px-5 py-2.5 text-xs font-bold transition-all duration-300 active:scale-95 bg-foreground text-background hover:opacity-90 shadow-lg shadow-foreground/10">
+              Book a Demo
+            </button>
             <div className="hidden lg:flex items-center gap-4 bg-muted/30 px-4 py-2 rounded-2xl border border-border/50">
               <div className="flex flex-col items-end">
                 <span className="text-xs font-bold">{currentProfile.name}</span>
