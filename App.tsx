@@ -202,18 +202,34 @@ const App: React.FC = () => {
     if (showAuth) {
       return (
         <div className="relative">
-          <button 
-            onClick={() => setShowAuth(false)}
-            className="fixed top-8 left-8 z-[60] flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowRight size={16} className="rotate-180" />
-            Back to Home
-          </button>
+          <div className="fixed top-8 left-8 z-[60] flex items-center gap-4">
+            <button 
+              onClick={() => setShowAuth(false)}
+              className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowRight size={16} className="rotate-180" />
+              Back to Home
+            </button>
+            <div className="w-[1px] h-4 bg-border"></div>
+            <button 
+              onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+              className="w-10 h-10 rounded-2xl hover:bg-muted transition-colors flex items-center justify-center text-muted-foreground"
+              title="Toggle Theme"
+            >
+              {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+            </button>
+          </div>
           <Auth />
         </div>
       );
     }
-    return <LandingPage onGetStarted={() => setShowAuth(true)} />;
+    return (
+      <LandingPage 
+        onGetStarted={() => setShowAuth(true)} 
+        theme={theme}
+        onToggleTheme={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+      />
+    );
   }
 
   return (

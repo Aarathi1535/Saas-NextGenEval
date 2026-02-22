@@ -12,14 +12,18 @@ import {
   Globe,
   Mail,
   Phone,
-  PlayCircle
+  PlayCircle,
+  Moon,
+  Sun
 } from 'lucide-react';
 
 interface LandingPageProps {
   onGetStarted: () => void;
+  theme: 'light' | 'dark';
+  onToggleTheme: () => void;
 }
 
-const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
+const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, theme, onToggleTheme }) => {
   const pricingPlans = [
     {
       name: "Starter",
@@ -90,6 +94,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
           </nav>
 
           <div className="flex items-center gap-4">
+            <button 
+              onClick={onToggleTheme}
+              className="w-10 h-10 rounded-2xl hover:bg-muted transition-colors flex items-center justify-center text-muted-foreground"
+              title="Toggle Theme"
+            >
+              {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+            </button>
             <button className="hidden sm:inline-flex items-center justify-center rounded-2xl px-5 py-2.5 text-xs font-bold transition-all duration-300 active:scale-95 bg-muted hover:bg-muted/80 text-foreground">
               Book a Demo
             </button>
