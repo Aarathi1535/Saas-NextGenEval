@@ -58,3 +58,5 @@ export interface BillingInfo {
   isPaid: boolean;
   sheetsEvaluatedThisMonth: number;
 }
+
+export type LegalPageType = 'privacy' | 'terms' | 'cookie';

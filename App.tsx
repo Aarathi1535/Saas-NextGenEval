@@ -4,7 +4,8 @@ import EvaluationReportView from './components/EvaluationReportView';
 import Dashboard from './components/Dashboard';
 import Auth from './components/Auth';
 import LandingPage from './components/LandingPage';
-import { UploadedFile, EvaluationReport, HistoryItem, UserProfile } from './types';
+import LegalPages from './components/LegalPages';
+import { UploadedFile, EvaluationReport, HistoryItem, UserProfile, LegalPageType } from './types';
 import { evaluateAnswerSheet } from './services/geminiService';
 import { supabase } from './supabase';
 import { 
@@ -29,13 +30,15 @@ import {
 const MAX_FILE_SIZE_MB = 3;
 const ADMIN_EMAIL = 'aarshiv.ai@gmail.com';
 
-type ViewMode = 'uploader' | 'dashboard' | 'report';
+type ViewMode = 'uploader' | 'dashboard' | 'report' | 'legal';
 
 const App: React.FC = () => {
   const [currentProfile, setCurrentProfile] = useState<UserProfile | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [showAuth, setShowAuth] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('uploader');
+  const [activeLegalPage, setActiveLegalPage] = useState<LegalPageType>('privacy');
+  const [previousViewMode, setPreviousViewMode] = useState<ViewMode>('uploader');
   const [qpFiles, setQpFiles] = useState<UploadedFile[]>([]);
   const [keyFiles, setKeyFiles] = useState<UploadedFile[]>([]);
   const [studentFiles, setStudentFiles] = useState<UploadedFile[]>([]);
@@ -186,6 +189,13 @@ const App: React.FC = () => {
     await supabase.auth.signOut();
   };
 
+  const openLegalPage = (type: LegalPageType) => {
+    setPreviousViewMode(viewMode);
+    setActiveLegalPage(type);
+    setViewMode('legal');
+    window.scrollTo(0, 0);
+  };
+
   if (isAuthLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background">
@@ -195,6 +205,15 @@ const App: React.FC = () => {
         </div>
         <p className="mt-6 text-sm font-semibold tracking-widest uppercase text-muted-foreground animate-pulse">Initializing System</p>
       </div>
+    );
+  }
+
+  if (viewMode === 'legal') {
+    return (
+      <LegalPages 
+        type={activeLegalPage} 
+        onBack={() => setViewMode(previousViewMode)} 
+      />
     );
   }
 
@@ -228,6 +247,7 @@ const App: React.FC = () => {
         onGetStarted={() => setShowAuth(true)} 
         theme={theme}
         onToggleTheme={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+        onOpenLegal={openLegalPage}
       />
     );
   }
@@ -431,11 +451,15 @@ const App: React.FC = () => {
             <div className="w-8 h-8 bg-brand-500 rounded-xl flex items-center justify-center text-white font-bold text-sm">N</div>
             <span className="font-bold tracking-tight text-xl">NextGenEval</span>
           </div>
-          <p className="text-sm text-muted-foreground mb-8">Empowering institutions with high-precision AI evaluation.</p>
-          <div className="flex items-center justify-center gap-8 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">
-            <span>Privacy Policy</span>
-            <span>Terms of Service</span>
-            <span>Security Audit</span>
+          <p className="text-sm text-muted-foreground mb-4">Empowering institutions with high-precision AI evaluation.</p>
+          <p className="text-[10px] font-bold text-brand-600 uppercase tracking-[0.2em] mb-8">
+            developed from the mind of aarshiv.ai
+          </p>
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">
+            <span className="hover:text-brand-500 cursor-pointer transition-colors" onClick={() => openLegalPage('privacy')}>Privacy Policy</span>
+            <span className="hover:text-brand-500 cursor-pointer transition-colors" onClick={() => openLegalPage('terms')}>Terms of Service</span>
+            <span className="hover:text-brand-500 cursor-pointer transition-colors" onClick={() => openLegalPage('cookie')}>Cookie Policy</span>
+            <span className="md:ml-auto">© 2026 NextGenEval. All rights reserved.</span>
           </div>
         </div>
       </footer>

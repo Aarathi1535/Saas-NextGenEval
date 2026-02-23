@@ -16,14 +16,16 @@ import {
   Moon,
   Sun
 } from 'lucide-react';
+import { LegalPageType } from '../types';
 
 interface LandingPageProps {
   onGetStarted: () => void;
   theme: 'light' | 'dark';
   onToggleTheme: () => void;
+  onOpenLegal: (type: LegalPageType) => void;
 }
 
-const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, theme, onToggleTheme }) => {
+const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, theme, onToggleTheme, onOpenLegal }) => {
   const pricingPlans = [
     {
       name: "Starter",
@@ -155,9 +157,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, theme, onToggle
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {[
-              { label: "Scripts Evaluated", value: "1M+" },
+              { label: "Scripts Evaluated", value: "100+" },
               { label: "Accuracy Rate", value: "99.8%" },
-              { label: "Institutions", value: "500+" },
+              { label: "Institutions", value: "2" },
               { label: "Time Saved", value: "85%" }
             ].map((stat, i) => (
               <div key={i} className="text-center">
@@ -343,7 +345,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, theme, onToggle
               <div className="space-y-4">
                 <div className="flex items-center gap-3 text-sm text-muted-foreground font-medium hover:text-brand-500 cursor-pointer transition-colors">
                   <Mail size={16} />
-                  support@nextgeneval.com
+                  aarshiv.ai@gmail.com
                 </div>
                 <div className="flex items-center gap-3 text-sm text-muted-foreground font-medium hover:text-brand-500 cursor-pointer transition-colors">
                   <Phone size={16} />
@@ -353,11 +355,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, theme, onToggle
             </div>
           </div>
           <div className="pt-12 border-t border-border/50 flex flex-col md:flex-row items-center justify-between gap-6">
-            <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">© 2026 NextGenEval. All rights reserved.</p>
+            <div className="flex flex-col items-center md:items-start gap-2">
+              <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">© 2026 NextGenEval. All rights reserved.</p>
+              <p className="text-[10px] font-bold text-brand-600 uppercase tracking-[0.2em]">developed from the mind of aarshiv.ai</p>
+            </div>
             <div className="flex items-center gap-8 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">
-              <span className="hover:text-brand-500 cursor-pointer transition-colors">Privacy Policy</span>
-              <span className="hover:text-brand-500 cursor-pointer transition-colors">Terms of Service</span>
-              <span className="hover:text-brand-500 cursor-pointer transition-colors">Cookie Policy</span>
+              <span className="hover:text-brand-500 cursor-pointer transition-colors" onClick={() => onOpenLegal('privacy')}>Privacy Policy</span>
+              <span className="hover:text-brand-500 cursor-pointer transition-colors" onClick={() => onOpenLegal('terms')}>Terms of Service</span>
+              <span className="hover:text-brand-500 cursor-pointer transition-colors" onClick={() => onOpenLegal('cookie')}>Cookie Policy</span>
             </div>
           </div>
         </div>
