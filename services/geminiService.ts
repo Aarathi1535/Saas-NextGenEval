@@ -26,7 +26,7 @@ export const evaluateAnswerSheet = async (
   }
 
   const ai = new GoogleGenAI({ apiKey });
-  const modelName = "gemini-3-pro-preview";
+  const modelName = "gemini-flash-preview";
 
   const parts: any[] = [
     {
