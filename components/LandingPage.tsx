@@ -347,7 +347,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, theme, onToggle
                 </div>
                 <div className="flex items-center gap-3 text-sm text-muted-foreground font-medium hover:text-brand-500 cursor-pointer transition-colors">
                   <Phone size={16} />
-                  +1 (555) 000-0000
+                  +91 93814 81266
                 </div>
               </div>
             </div>
