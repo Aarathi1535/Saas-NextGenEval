@@ -85,7 +85,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, theme, onToggle
             </div>
             <div className="flex flex-col">
               <span className="text-lg font-bold tracking-tight leading-none">NextGenEval</span>
-              <span className="text-[10px] font-bold text-brand-600 uppercase tracking-widest"></span>
+              <span className="text-[10px] font-bold text-brand-600 uppercase tracking-widest">AI Core v2.5</span>
             </div>
           </div>
 
@@ -293,7 +293,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, theme, onToggle
               <Sparkles size={300} />
             </div>
             <h2 className="text-4xl lg:text-6xl font-black tracking-tight mb-8 relative z-10">Ready to transform your <br />grading workflow?</h2>
-            <p className="text-xl opacity-70 mb-12 max-w-2xl mx-auto font-medium relative z-10">Join us to use NextGenEval to deliver better feedback to your students.</p>
+            <p className="text-xl opacity-70 mb-12 max-w-2xl mx-auto font-medium relative z-10">Join hundreds of institutions already using NextGenEval to deliver better feedback to their students.</p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 relative z-10">
               <button 
                 onClick={onGetStarted}
@@ -327,10 +327,19 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, theme, onToggle
               <ul className="space-y-4 text-sm text-muted-foreground font-medium">
                 <li><a href="#features" className="hover:text-brand-500 cursor-pointer transition-colors">Features</a></li>
                 <li><a href="#pricing" className="hover:text-brand-500 cursor-pointer transition-colors">Pricing</a></li>
-               
+                <li className="hover:text-brand-500 cursor-pointer transition-colors">Security</li>
+                <li className="hover:text-brand-500 cursor-pointer transition-colors">API</li>
               </ul>
             </div>
-           
+            <div>
+              <h4 className="font-bold mb-6">Company</h4>
+              <ul className="space-y-4 text-sm text-muted-foreground font-medium">
+                <li><a href="#about" className="hover:text-brand-500 cursor-pointer transition-colors">About Us</a></li>
+                <li className="hover:text-brand-500 cursor-pointer transition-colors">Careers</li>
+                <li className="hover:text-brand-500 cursor-pointer transition-colors">Blog</li>
+                <li className="hover:text-brand-500 cursor-pointer transition-colors">Contact</li>
+              </ul>
+            </div>
             <div>
               <h4 className="font-bold mb-6">Support</h4>
               <div className="space-y-4">
